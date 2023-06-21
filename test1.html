@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Button Example</title>
+  <style>
+    .circle {
+      width: 60px;
+      height: 60px;
+      border: 2px solid black;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 5px;
+      cursor: pointer;
+      transition: background-color 0.5s;
+    }
+
+    .color-preview {
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      border: 1px solid black;
+      margin-left: 10px;
+    }
+
+    .color-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .color-item {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    function sendRequest2() {
+      var ipAddress = document.getElementById("ipAddress").value;
+      var commandValue = document.getElementById("commandValue").value;
+      var brightness = document.getElementById("brightness").value;
+      var segments = document.getElementById("segments").value;
+      var hexValues = document.getElementById("hexValues").value;
+      var url = "http://" + ipAddress + "/win&T=0";
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.send();
+    }
+
+    function sendRequest() {
+      var ipAddress = document.getElementById("ipAddress").value;
+      var commandValue = document.getElementById("commandValue").value;
+      var brightness = document.getElementById("brightness").value;
+      var segments = document.getElementById("segments").value;
+      var hexValues = document.getElementById("hexValues").value;
+      var url = "http://" + ipAddress + "/win&T=1";
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.send();
+    }
+
+    function hexToRgb(hexColor) {
+      if (!hexColor) {
+        return null;
+      }
+      var red = parseInt(hexColor.substr(1, 2), 16);
+      var green = parseInt(hexColor.substr(3, 2), 16);
+      var blue = parseInt(hexColor.substr(5, 2), 16);
+      return [red, green, blue];
+    }
+
+    function rgbToHex(red, green, blue) {
+      var hexRed = Number(red).toString(16).padStart(2, "0");
+      var hexGreen = Number(green).toString(16).padStart(2, "0");
+      var hexBlue = Number(blue).toString(16).padStart(2, "0");
+      return "#" + hexRed + hexGreen + hexBlue;
+    }
+
+    function updateHexColor() {
+      var red = document.getElementById("redSlider").value;
+      var green = document.getElementById("greenSlider").value;
+      var blue = document.getElementById("blueSlider").value;
+      var hexColor = rgbToHex(red, green, blue);
+      document.getElementById("colorValue").value = hexColor;
+      document.getElementById("colorPreview").style.backgroundColor = hexColor;
+
+      // Update RGB values next to sliders
+      document.getElementById("redValue").textContent = red;
+      document.getElementById("greenValue").textContent = green;
+      document.getElementById("blueValue").textContent = blue;
+    }
+
+    function createGrid() {
+      var width = parseInt(document.getElementById("commandValue").value);
+      var length = parseInt(document.getElementById("commandValue2").value);
+      var color = document.getElementById("colorValue").value;
+      var gridContainer = document.getElementById("gridContainer");
+
+      gridContainer.innerHTML = ""; // Clear previous grid
+
+      var labelCounter = 1; // Counter for labeling circles
+
+      for (var i = 0; i < length; i++) {
+        var row = document.createElement("div"); // Create a new row for each iteration
+        for (var j = width; j > 0; j--) {
+          var circle = document.createElement("div");
+          circle.classList.add("circle");
+          labelCounter++;
+          circle.style.backgroundColor = "#000000";
+          circle.addEventListener("click", function () {
+            var circleColor = document.getElementById("colorValue").value;
+            this.style.backgroundColor = circleColor;
+          });
+          row.appendChild(circle);
+        }
+        if (i % 2 !== 0) {
+          row.style.flexDirection = "row-reverse"; // Reverse the order of circles in odd rows
+        }
+        gridContainer.appendChild(row);
+      }
+    }
+
+    function collectHexValues() {
+  var hexValues = "";
+  var circles = document.getElementsByClassName("circle");
+  for (var i = 0; i < circles.length; i++) {
+    var circleColor = circles[i].style.backgroundColor;
+    var hexColor = rgbToHexValue(circleColor);
+    if (hexColor) {
+      hexValues += '"' + hexColor + '",';
+    }
+  }
+  hexValues = "[" + hexValues.slice(0, -1) + "]"; // Add [ ] and remove the trailing comma
+
+  var brightness = document.getElementById("brightness").value;
+  var segments = document.getElementById("segments").value - 1; // Subtract 1 from segments
+  var jsonOutput = '{"on":true,"bri":' + brightness + ',"seg":{"id":' + segments + ',"i":' + hexValues + '}}';
+
+  document.getElementById("hexValues").value =
+    jsonOutput || '{"on": true, "bri": 0, "seg": {"id": 0, "i": ["000000"]}}';
+}
+
+    function rgbToHexValue(rgbColor) {
+      if (!rgbColor || rgbColor === "transparent") {
+        return "";
+      }
+      var rgbArray = rgbColor.match(/\d+/g);
+      var red = parseInt(rgbArray[0]).toString(16).padStart(2, "0");
+      var green = parseInt(rgbArray[1]).toString(16).padStart(2, "0");
+      var blue = parseInt(rgbArray[2]).toString(16).padStart(2, "0");
+      return red + green + blue;
+    }
+
+    function selectColor(color) {
+      document.getElementById("colorValue").value = color;
+      document.getElementById("colorPreview").style.backgroundColor = color;
+
+      var rgbColor = hexToRgb(color);
+      if (rgbColor) {
+        document.getElementById("redSlider").value = rgbColor[0];
+        document.getElementById("greenSlider").value = rgbColor[1];
+        document.getElementById("blueSlider").value = rgbColor[2];
+      }
+
+      updateHexColor();
+    }
+
+    // New code to update color preview and RGB sliders when hex color code is entered
+    function updateColorPreview() {
+      var hexColor = document.getElementById("colorValue").value;
+      document.getElementById("colorPreview").style.backgroundColor = hexColor;
+
+      var rgbColor = hexToRgb(hexColor);
+      if (rgbColor) {
+        document.getElementById("redSlider").value = rgbColor[0];
+        document.getElementById("greenSlider").value = rgbColor[1];
+        document.getElementById("blueSlider").value = rgbColor[2];
+      }
+    }
+
+    function updateColorPreview() {
+  var hexColor = document.getElementById("colorValue").value;
+  document.getElementById("colorPreview").style.backgroundColor = hexColor;
+
+  var rgbColor = hexToRgb(hexColor);
+  if (rgbColor) {
+    document.getElementById("redSlider").value = rgbColor[0];
+    document.getElementById("greenSlider").value = rgbColor[1];
+    document.getElementById("blueSlider").value = rgbColor[2];
+
+    document.getElementById("redValue").innerText = rgbColor[0];
+    document.getElementById("greenValue").innerText = rgbColor[1];
+    document.getElementById("blueValue").innerText = rgbColor[2];
+  }
+}
+
+  </script>
+</head>
+<body>
+  <label for="ipAddress">IP Address:</label>
+  <input type="text" id="ipAddress" placeholder="Enter IP address" value="">
+  <br>
+  <label for="requestType">Request Type:</label>
+<select id="requestType">
+  <option value="curl">Curl</option>
+  <option value="wled">WLED</option>
+</select>
+<br>
+  <label for="commandValue">Width:</label>
+  <input type="text" id="commandValue" placeholder="Enter width" value="">
+  <br>
+  <label for="commandValue2">Length:</label>
+  <input type="text" id="commandValue2" placeholder="Enter length" value="">
+  <br>
+  <label for="colorValue">Hex Color:</label>
+  <input type="text" id="colorValue" placeholder="Enter hex color code" value="#" oninput="updateColorPreview()">
+  <div class="color-preview" id="colorPreview"></div>
+  <br>
+  <label for="redSlider">Red:</label>
+  <input type="range" id="redSlider" min="0" max="255" value="0" onchange="updateHexColor()">
+  <span id="redValue">0</span>
+  <br>
+  <label for="greenSlider">Green:</label>
+  <input type="range" id="greenSlider" min="0" max="255" value="0" onchange="updateHexColor()">
+  <span id="greenValue">0</span>
+  <br>
+  <label for="blueSlider">Blue:</label>
+  <input type="range" id="blueSlider" min="0" max="255" value="0" onchange="updateHexColor()">
+  <span id="blueValue">0</span>
+  <br>
+  <div class="color-list">
+    <div class="color-item" onclick="selectColor('#FF0000')" style="background-color: #FF0000;"></div>
+    <div class="color-item" onclick="selectColor('#00FF00')" style="background-color: #00FF00;"></div>
+    <div class="color-item" onclick="selectColor('#0000FF')" style="background-color: #0000FF;"></div>
+    <div class="color-item" onclick="selectColor('#FFFF00')" style="background-color: #FFFF00;"></div>
+    <div class="color-item" onclick="selectColor('#00FFFF')" style="background-color: #00FFFF;"></div>
+    <div class="color-item" onclick="selectColor('#FF00FF')" style="background-color: #FF00FF;"></div>
+    <div class="color-item" onclick="selectColor('#000000')" style="background-color: #000000;"></div>
+    <div class="color-item" onclick="selectColor('#ffffff')" style="background-color: #ffffff;"></div>
+  </div>
+  <br>
+  <button onclick="createGrid()">Create Grid</button>
+  <button onclick="collectHexValues()">Get WLED Preset</button>
+  <br>
+  <div id="gridContainer"></div>
+  <br>
+  <label for="brightness">Brightness:</label>
+  <input type="number" id="brightness" min="0" max="255" placeholder="0-255" value="128">
+  <br>
+  <label for="segments">Segment #:</label>
+  <input type="number" id="segments" min="0" max="12" placeholder="Enter the segment #" value="1">
+  <br>
+  <button onclick="sendRequest()">On</button>
+  <button onclick="sendRequest2()">Off</button>
+  <br>
+  <textarea id="hexValues" rows="5" cols="40"></textarea>
+</body>
+</html>
