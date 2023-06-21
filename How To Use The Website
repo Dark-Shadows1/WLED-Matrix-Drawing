@@ -1,0 +1,9 @@
+1: Open the html file to a web browser.
+2: Enter your WLED server IP address. (The only thing this does right now is turns the leds on and off with the two buttons).
+3: Enter the width and hight of the matrix.
+4: Click create grid.
+5: Color in whatever you want by clicking the grid circles. (You change the color by either moving the rgb slider, clicking one of the presets, or inputing a hex color code).
+6: Input your brightnes value and target segment. (The brightness is defaulted to 128 and the target segment defaults to 1).
+7: Click "Get WLED Preset".
+8: Copy the preset code.
+9: Make a new WLED preset slot unselect if selected "overwite with state" and paste the copyed code into the text box then press "save".
